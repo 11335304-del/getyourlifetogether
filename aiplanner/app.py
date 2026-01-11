@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, Response
 from datetime import datetime, timedelta
 from dataclasses import dataclass, field
 from typing import List, Tuple, Optional
@@ -251,8 +251,8 @@ def update_task(task_id):
     data = request.json
     # Expecting ISO format strings
     try:
-        start_time = datetime.fromisoformat(data['start_time'])
-        end_time = datetime.fromisoformat(data['end_time'])
+        start_time = datetime.fromisoformat(data['start_time']).replace(tzinfo=None)
+        end_time = datetime.fromisoformat(data['end_time']).replace(tzinfo=None)
         name = data['name']
         
         scheduler.update_task(task_id, name, start_time, end_time)
@@ -279,10 +279,80 @@ def get_schedule():
         "breaks": breaks
     })
 
-@app.route('/api/clear', methods=['POST'])
-def clear():
     scheduler.clear_tasks()
     return jsonify({"status": "cleared"})
+
+# ==========================
+# AI Wellness Coach (Gemini)
+# ==========================
+import google.generativeai as genai
+import os
+
+# Configure API Key
+GEMINI_API_KEY = "AIzaSyBlw_P8JGQ9TTWKgviiuJ_XZoW3n0_z1eU"
+genai.configure(api_key=GEMINI_API_KEY)
+
+@app.route('/api/analyze_wellness', methods=['POST'])
+def analyze_wellness():
+    if not GEMINI_API_KEY:
+        return jsonify({
+            "status": "mock",
+            "message": "AI Coach is in Demo Mode (No API Key). <br><br>Tip: You have a balanced schedule! Remember to drink water."
+        })
+    
+    try:
+        data = request.json
+        tasks = data.get('tasks', [])
+        
+        # Construct Prompt
+        schedule_text = "\n".join([f"- {t['name']} ({t['start_time']} to {t['end_time']})" for t in tasks])
+        prompt = f"""
+        You are a supportive wellness coach. Analyze this daily schedule and provide 3 specific, actionable wellness tips.
+        Focus on energy management, breaks, and mindset. Keep it brief (max 50 words per tip).
+        
+        Schedule:
+        {schedule_text}
+        
+        Format output as HTML bullet points.
+        """
+        
+        model = genai.GenerativeModel('gemini-pro')
+        response = model.generate_content(prompt)
+        
+        return jsonify({
+            "status": "success",
+            "message": response.text
+        })
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)})
+
+
+        return jsonify({
+            "status": "success",
+            "message": response.text
+        })
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)})
+
+# ==========================
+# Posture Guard (CV)
+# ==========================
+try:
+    from aiplanner.camera import VideoCamera
+except ImportError:
+    from camera import VideoCamera
+
+def gen(camera):
+    while True:
+        frame, is_slouching = camera.get_frame()
+        if frame:
+            yield (b'--frame\r\n'
+                   b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
+
+@app.route('/video_feed')
+def video_feed():
+    return Response(gen(VideoCamera()),
+                    mimetype='multipart/x-mixed-replace; boundary=frame')
 
 if __name__ == '__main__':
     print("Starting Flask Server...")

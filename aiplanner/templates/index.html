@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Getyourlifetogether</title>
     <link rel="stylesheet" href="/static/style.css">
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
     <link href="https://fonts.googleapis.com/css2?family=Italiana&display=swap" rel="stylesheet">
 </head>
 
@@ -36,15 +37,51 @@
                     <ul id="wellness-list">
                         <li>Your schedule looks clear!</li>
                     </ul>
+                    <button id="analyze-btn" class="secondary-btn" style="width: 100%; margin-top: 1rem;">🤖 Analyze
+                        Day</button>
+                </div>
+
+                <div class="wellness-widget" id="posture-widget">
+                    <h3>👀 Posture Guard</h3>
+                    <div id="camera-container" class="hidden" style="margin-top: 1rem; text-align: center;">
+                        <img id="video-feed" src=""
+                            style="width: 100%; border-radius: 0.5rem; border: 2px solid var(--accent-primary);">
+                        <p style="font-size: 0.8rem; margin-top: 0.5rem;">Calibrating... Sit straight!</p>
+                    </div>
+                    <button id="toggle-camera-btn" class="primary-btn" style="width: 100%; margin-top: 1rem;">Enable
+                        Camera</button>
                 </div>
             </div>
 
             <div class="right-panel">
-                <div class="timeline-container" id="timeline">
-                    <!-- Tasks will be injected here -->
-                </div>
+                <div id="calendar"></div>
             </div>
         </main>
+
+        <!-- Task Details Modal -->
+        <div id="task-modal" class="modal hidden">
+            <div class="modal-content">
+                <h2 id="modal-task-name">Task Name</h2>
+                <p id="modal-task-time">10:00 - 11:00</p>
+                <div class="modal-actions">
+                    <button id="start-focus-btn" class="primary-btn">🎯 Start Focus</button>
+                    <button id="delete-task-btn" class="secondary-btn">🗑️ Delete</button>
+                    <button id="close-modal-btn" class="secondary-btn">Close</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Focus Timer Overlay -->
+        <div id="focus-overlay" class="overlay hidden">
+            <div class="timer-container">
+                <h1 id="timer-display">25:00</h1>
+                <h3 id="focus-task-name">Focusing on...</h3>
+                <div class="timer-controls">
+                    <button id="pause-timer-btn" class="icon-btn" style="font-size: 2rem;">⏸️</button>
+                    <button id="stop-timer-btn" class="icon-btn" style="font-size: 2rem;">⏹️</button>
+                </div>
+            </div>
+        </div>
     </div>
     <script src="/static/script.js"></script>
 </body>

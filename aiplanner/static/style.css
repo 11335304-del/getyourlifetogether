@@ -1,19 +1,25 @@
 :root {
-    /* Palette: Mother Earth / Lucky Dice / Old Burgundy */
-    --bg-color: #F4F1E2;
-    /* Lucky Dice */
-    --card-bg: rgba(255, 255, 255, 0.6);
-    --card-border: rgba(83, 58, 51, 0.1);
-    --text-primary: #43302E;
-    /* Old Burgundy */
-    --text-secondary: #533A33;
-    /* Royal Brown */
-    --accent-primary: #43302E;
-    /* Old Burgundy */
-    --accent-secondary: #C1DBE8;
-    /* Pastel Blue */
-    --accent-highlight: #FCE6B7;
-    /* The Bay */
+    /* STRICT PALETTE FROM IMAGE */
+    --mother-earth: #513229;
+    --lucky-dice: #F4F1E2;
+    --something-blue: #D8EBF9;
+    --the-bay: #FCE6B7;
+    --walking-vinnie: #D7D4B1;
+    --old-burgundy: #43302E;
+    --pastel-blue: #C1DBE8;
+
+    /* Semantic Mappings */
+    --bg-color: var(--lucky-dice);
+    --text-primary: var(--mother-earth);
+    --text-secondary: var(--old-burgundy);
+
+    --card-bg: rgba(255, 255, 255, 0.5);
+    --card-border: var(--walking-vinnie);
+
+    --accent-primary: var(--mother-earth);
+    --accent-secondary: var(--something-blue);
+    --accent-highlight: var(--the-bay);
+
     --font-family: 'Italiana', serif;
 }
 
@@ -66,6 +72,10 @@ main {
     display: flex;
     flex-direction: column;
     gap: 2rem;
+    overflow-y: auto;
+    /* Enable scrolling */
+    padding-right: 0.5rem;
+    /* Avoid scrollbar covering content */
 }
 
 .right-panel {
@@ -197,6 +207,9 @@ button:hover {
     display: flex;
     gap: 1rem;
     margin-bottom: 1rem;
+    width: 100%;
+    /* Ensure it fits parent */
+    box-sizing: border-box;
 }
 
 .task-input {
@@ -207,6 +220,9 @@ button:hover {
     background: rgba(255, 255, 255, 0.5);
     font-family: inherit;
     font-size: 1rem;
+    min-width: 0;
+    /* Prevent flex item from overflowing */
+    box-sizing: border-box;
 }
 
 .duration-input {
@@ -217,6 +233,9 @@ button:hover {
     background: rgba(255, 255, 255, 0.5);
     font-family: inherit;
     font-size: 1rem;
+    min-width: 0;
+    /* Prevent flex item from overflowing */
+    box-sizing: border-box;
 }
 
 .task-actions {
@@ -253,4 +272,123 @@ button:hover {
     font-style: italic;
     border-left: 2px solid var(--accent-highlight);
     padding-left: 0.5rem;
+}
+
+/* Calendar Styles */
+#calendar {
+    height: 100%;
+    font-family: var(--font-family);
+}
+
+.fc-toolbar-title {
+    font-size: 1.5rem !important;
+    font-weight: 400 !important;
+}
+
+.fc-button {
+    background-color: var(--accent-primary) !important;
+    border-color: var(--accent-primary) !important;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.fc-button:hover {
+    background-color: var(--text-secondary) !important;
+    border-color: var(--text-secondary) !important;
+}
+
+.fc-event {
+    cursor: pointer;
+    border: none !important;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Modal & Overlay Styles */
+.hidden {
+    display: none !important;
+}
+
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: var(--bg-color);
+    padding: 2rem;
+    border-radius: 1rem;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--card-border);
+}
+
+.modal-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 1.5rem;
+}
+
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(67, 48, 46, 0.95);
+    /* Darker version of text-primary */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    color: #F4F1E2;
+}
+
+.timer-container {
+    text-align: center;
+}
+
+#timer-display {
+    font-size: 8rem;
+    margin: 0;
+    font-weight: 300;
+    font-variant-numeric: tabular-nums;
+}
+
+#focus-task-name {
+    font-size: 2rem;
+    margin-top: 0;
+    opacity: 0.8;
+    font-weight: 300;
+}
+
+.timer-controls {
+    margin-top: 2rem;
+    display: flex;
+    gap: 2rem;
+    justify-content: center;
+}
+
+.timer-controls button {
+    color: #F4F1E2;
+    border: 1px solid rgba(244, 241, 226, 0.3);
+    border-radius: 50%;
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.timer-controls button:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: scale(1.1);
 }

@@ -3,17 +3,153 @@ document.addEventListener('DOMContentLoaded', () => {
     const taskDurationInput = document.getElementById('task-duration');
     const planBtn = document.getElementById('plan-btn');
     const clearBtn = document.getElementById('clear-btn');
-    const timeline = document.getElementById('timeline');
     const wellnessList = document.getElementById('wellness-list');
     const currentDate = document.getElementById('current-date');
+    const calendarEl = document.getElementById('calendar');
+    const analyzeBtn = document.getElementById('analyze-btn');
+
+    // Modal Elements
+    const taskModal = document.getElementById('task-modal');
+    const modalTaskName = document.getElementById('modal-task-name');
+    const modalTaskTime = document.getElementById('modal-task-time');
+    const startFocusBtn = document.getElementById('start-focus-btn');
+    const deleteTaskBtn = document.getElementById('delete-task-btn');
+    const closeModalBtn = document.getElementById('close-modal-btn');
+
+    // Timer Elements
+    const focusOverlay = document.getElementById('focus-overlay');
+    const timerDisplay = document.getElementById('timer-display');
+    const focusTaskName = document.getElementById('focus-task-name');
+    const pauseTimerBtn = document.getElementById('pause-timer-btn');
+    const stopTimerBtn = document.getElementById('stop-timer-btn');
+
+    let currentEventId = null;
+    let timerInterval = null;
+    let timeLeft = 25 * 60; // 25 minutes in seconds
+    let isPaused = false;
 
     // Set Date
     const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
     currentDate.textContent = new Date().toLocaleDateString('en-US', options);
 
-    // Load initial schedule
-    fetchSchedule();
+    // Initialize FullCalendar
+    const calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'timeGridWeek',
+        headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'timeGridWeek,timeGridDay'
+        },
+        height: 'auto',
+        editable: true,
+        selectable: true,
+        slotMinTime: '08:00:00',
+        slotMaxTime: '22:00:00',
+        allDaySlot: false,
+        events: async function (info, successCallback, failureCallback) {
+            try {
+                const response = await fetch('/api/schedule');
+                const data = await response.json();
 
+                renderWellness(data.breaks, data.conflicts);
+
+                const events = data.tasks.map(task => ({
+                    id: task.id,
+                    title: task.name,
+                    start: task.start_time,
+                    end: task.end_time,
+                    backgroundColor: '#C1DBE8', // Pastel Blue
+                    borderColor: '#C1DBE8',
+                    textColor: '#43302E' // Old Burgundy for contrast
+                }));
+                successCallback(events);
+            } catch (error) {
+                failureCallback(error);
+            }
+        },
+        eventDrop: function (info) { updateTask(info.event); },
+        eventResize: function (info) { updateTask(info.event); },
+        eventClick: function (info) {
+            openTaskModal(info.event);
+        }
+    });
+
+    calendar.render();
+
+    // --- Modal Logic ---
+    function openTaskModal(event) {
+        currentEventId = event.id;
+        modalTaskName.textContent = event.title;
+
+        const start = event.start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const end = event.end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        modalTaskTime.textContent = `${start} - ${end}`;
+
+        taskModal.classList.remove('hidden');
+    }
+
+    closeModalBtn.addEventListener('click', () => {
+        taskModal.classList.add('hidden');
+    });
+
+    deleteTaskBtn.addEventListener('click', () => {
+        if (currentEventId) {
+            if (confirm("Delete this task?")) {
+                deleteTask(currentEventId);
+                taskModal.classList.add('hidden');
+            }
+        }
+    });
+
+    startFocusBtn.addEventListener('click', () => {
+        taskModal.classList.add('hidden');
+        startFocusSession(modalTaskName.textContent);
+    });
+
+    // --- Timer Logic ---
+    function startFocusSession(taskName) {
+        focusOverlay.classList.remove('hidden');
+        focusTaskName.textContent = `Focusing on: ${taskName}`;
+        timeLeft = 25 * 60;
+        isPaused = false;
+        updateTimerDisplay();
+
+        if (timerInterval) clearInterval(timerInterval);
+        timerInterval = setInterval(tick, 1000);
+        pauseTimerBtn.textContent = '⏸️';
+    }
+
+    function tick() {
+        if (!isPaused) {
+            timeLeft--;
+            updateTimerDisplay();
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                alert("Focus session complete! Take a break. ☕");
+                focusOverlay.classList.add('hidden');
+            }
+        }
+    }
+
+    function updateTimerDisplay() {
+        const minutes = Math.floor(timeLeft / 60);
+        const seconds = timeLeft % 60;
+        timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    }
+
+    pauseTimerBtn.addEventListener('click', () => {
+        isPaused = !isPaused;
+        pauseTimerBtn.textContent = isPaused ? '▶️' : '⏸️';
+    });
+
+    stopTimerBtn.addEventListener('click', () => {
+        if (confirm("Stop focus session?")) {
+            clearInterval(timerInterval);
+            focusOverlay.classList.add('hidden');
+        }
+    });
+
+    // --- Core App Logic ---
     planBtn.addEventListener('click', async () => {
         const name = taskNameInput.value;
         const duration = taskDurationInput.value;
@@ -32,8 +168,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await response.json();
             if (data.status === 'success') {
                 taskNameInput.value = '';
-                // Keep duration as 60 or reset? Let's keep it.
-                fetchSchedule();
+                calendar.refetchEvents();
             } else {
                 alert("Error: " + data.message);
             }
@@ -45,117 +180,86 @@ document.addEventListener('DOMContentLoaded', () => {
     clearBtn.addEventListener('click', async () => {
         if (confirm('Are you sure you want to clear all tasks?')) {
             await fetch('/api/clear', { method: 'POST' });
-            fetchSchedule();
+            calendar.refetchEvents();
         }
     });
 
-    async function fetchSchedule() {
-        const response = await fetch('/api/schedule');
-        const data = await response.json();
-        renderTimeline(data);
-        renderWellness(data.breaks, data.conflicts);
-    }
+    analyzeBtn.addEventListener('click', async () => {
+        analyzeBtn.textContent = "Thinking... 🧠";
+        analyzeBtn.disabled = true;
 
-    function renderTimeline(data) {
-        timeline.innerHTML = '';
+        try {
+            // Fetch current tasks first
+            const scheduleResponse = await fetch('/api/schedule');
+            const scheduleData = await scheduleResponse.json();
 
-        // Group tasks by day
-        const tasksByDay = {};
-        data.tasks.forEach(task => {
-            const date = new Date(task.start_time).toLocaleDateString();
-            if (!tasksByDay[date]) tasksByDay[date] = [];
-            tasksByDay[date].push(task);
-        });
-
-        // Render
-        for (const [date, tasks] of Object.entries(tasksByDay)) {
-            const dayDiv = document.createElement('div');
-            dayDiv.className = 'timeline-day';
-
-            const header = document.createElement('div');
-            header.className = 'day-header';
-            header.textContent = date;
-            dayDiv.appendChild(header);
-
-            tasks.forEach(task => {
-                const card = document.createElement('div');
-                card.className = 'task-card';
-
-                const timeStr = new Date(task.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                const endTimeStr = new Date(task.end_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
-                card.innerHTML = `
-                    <div class="task-info">
-                        <span class="task-time">${timeStr} - ${endTimeStr}</span>
-                        <span class="task-name">${task.name}</span>
-                    </div>
-                    <div class="task-actions">
-                        <button class="icon-btn edit-btn" data-id="${task.id}" data-name="${task.name}" data-start="${task.start_time}" data-end="${task.end_time}">✏️</button>
-                        <button class="icon-btn delete-btn" data-id="${task.id}">🗑️</button>
-                    </div>
-                `;
-                dayDiv.appendChild(card);
+            const response = await fetch('/api/analyze_wellness', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ tasks: scheduleData.tasks })
             });
+            const data = await response.json();
 
-            timeline.appendChild(dayDiv);
+            if (data.status === 'success' || data.status === 'mock') {
+                wellnessList.innerHTML = `<div class="ai-response">${data.message}</div>`;
+            } else {
+                alert("Error: " + data.message);
+            }
+        } catch (error) {
+            console.error("Error analyzing wellness:", error);
+            alert("Failed to analyze.");
+        } finally {
+            analyzeBtn.textContent = "🤖 Analyze Day";
+            analyzeBtn.disabled = false;
         }
+    });
 
-        // Attach event listeners to new buttons
-        document.querySelectorAll('.delete-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const id = e.target.dataset.id;
-                deleteTask(id);
-            });
-        });
+    // --- Posture Guard Logic ---
+    const toggleCameraBtn = document.getElementById('toggle-camera-btn');
+    const cameraContainer = document.getElementById('camera-container');
+    const videoFeed = document.getElementById('video-feed');
+    let isCameraOn = false;
 
-        document.querySelectorAll('.edit-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const id = e.target.dataset.id;
-                const name = e.target.dataset.name;
-                const start = e.target.dataset.start;
-                const end = e.target.dataset.end;
-                editTask(id, name, start, end);
-            });
-        });
+    toggleCameraBtn.addEventListener('click', () => {
+        isCameraOn = !isCameraOn;
 
-        // Render Conflicts globally for now
-        if (data.conflicts.length > 0) {
-            const conflictDiv = document.createElement('div');
-            conflictDiv.className = 'conflict-section';
-            data.conflicts.forEach(conflict => {
-                const alert = document.createElement('div');
-                alert.className = 'conflict-alert';
-                alert.textContent = `⚠️ ${conflict.message}`;
-                conflictDiv.appendChild(alert);
+        if (isCameraOn) {
+            videoFeed.src = "/video_feed";
+            cameraContainer.classList.remove('hidden');
+            toggleCameraBtn.textContent = "Disable Camera";
+            toggleCameraBtn.classList.replace('primary-btn', 'secondary-btn');
+        } else {
+            videoFeed.src = "";
+            cameraContainer.classList.add('hidden');
+            toggleCameraBtn.textContent = "Enable Camera";
+            toggleCameraBtn.classList.replace('secondary-btn', 'primary-btn');
+        }
+    });
+
+    async function updateTask(event) {
+        try {
+            await fetch(`/api/tasks/${event.id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: event.title,
+                    start_time: event.start.toISOString(),
+                    end_time: event.end.toISOString()
+                })
             });
-            timeline.prepend(conflictDiv);
+        } catch (error) {
+            console.error("Error updating task:", error);
+            alert("Failed to update task.");
+            info.revert();
         }
     }
 
     async function deleteTask(id) {
-        if (confirm("Delete this task?")) {
-            await fetch(`/api/tasks/${id}`, { method: 'DELETE' });
-            fetchSchedule();
-        }
-    }
-
-    async function editTask(id, currentName, start, end) {
-        const newName = prompt("Edit task name:", currentName);
-        if (!newName) return;
-
         try {
-            await fetch(`/api/tasks/${id}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    name: newName,
-                    start_time: start,
-                    end_time: end
-                })
-            });
-            fetchSchedule();
+            await fetch(`/api/tasks/${id}`, { method: 'DELETE' });
+            calendar.refetchEvents();
         } catch (error) {
-            console.error("Error updating task:", error);
+            console.error("Error deleting task:", error);
         }
     }
 
