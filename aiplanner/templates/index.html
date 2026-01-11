@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Getyourlifetogether</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Italiana&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="app-container">
+        <header>
+            <div class="logo">✨ Getyourlifetogether</div>
+            <div class="date" id="current-date">Today</div>
+        </header>
+
+        <main>
+            <div class="left-panel">
+                <div class="input-card">
+                    <h2>What's on your mind?</h2>
+                    <div class="input-group">
+                        <input type="text" id="task-name" placeholder="Task Name (e.g. History Project)"
+                            class="task-input">
+                        <input type="number" id="task-duration" placeholder="Mins" value="60" class="duration-input">
+                    </div>
+                    <div class="button-group">
+                        <button id="plan-btn" class="primary-btn">Plan It ✨</button>
+                        <button id="clear-btn" class="secondary-btn">Clear All</button>
+                    </div>
+                </div>
+
+                <div class="wellness-widget" id="wellness-widget">
+                    <h3>🌱 Wellness Tips</h3>
+                    <ul id="wellness-list">
+                        <li>Your schedule looks clear!</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="right-panel">
+                <div class="timeline-container" id="timeline">
+                    <!-- Tasks will be injected here -->
+                </div>
+            </div>
+        </main>
+    </div>
+    <script src="/static/script.js"></script>
+</body>
+
+</html>

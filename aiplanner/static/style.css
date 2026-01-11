@@ -1,0 +1,256 @@
+:root {
+    /* Palette: Mother Earth / Lucky Dice / Old Burgundy */
+    --bg-color: #F4F1E2;
+    /* Lucky Dice */
+    --card-bg: rgba(255, 255, 255, 0.6);
+    --card-border: rgba(83, 58, 51, 0.1);
+    --text-primary: #43302E;
+    /* Old Burgundy */
+    --text-secondary: #533A33;
+    /* Royal Brown */
+    --accent-primary: #43302E;
+    /* Old Burgundy */
+    --accent-secondary: #C1DBE8;
+    /* Pastel Blue */
+    --accent-highlight: #FCE6B7;
+    /* The Bay */
+    --font-family: 'Italiana', serif;
+}
+
+body {
+    margin: 0;
+    font-family: var(--font-family);
+    background: var(--bg-color);
+    color: var(--text-primary);
+    height: 100vh;
+    overflow: hidden;
+}
+
+.app-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 2rem;
+    box-sizing: border-box;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.logo {
+    font-size: 2.5rem;
+    /* Larger for Americana/Italiana style */
+    font-weight: 400;
+    letter-spacing: 1px;
+}
+
+.date {
+    font-size: 1.2rem;
+    color: var(--text-secondary);
+    font-style: italic;
+}
+
+main {
+    display: flex;
+    gap: 2rem;
+    flex: 1;
+    overflow: hidden;
+}
+
+.left-panel {
+    width: 30%;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.right-panel {
+    width: 70%;
+    background: var(--card-bg);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--card-border);
+    border-radius: 1rem;
+    padding: 2rem;
+    overflow-y: auto;
+    box-shadow: 0 4px 20px rgba(83, 58, 51, 0.05);
+}
+
+.input-card,
+.wellness-widget {
+    background: var(--card-bg);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--card-border);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    box-shadow: 0 4px 15px rgba(83, 58, 51, 0.05);
+}
+
+h2,
+h3 {
+    font-weight: 400;
+    margin-top: 0;
+}
+
+textarea {
+    width: 100%;
+    height: 100px;
+    background: rgba(255, 255, 255, 0.5);
+    border: 1px solid var(--card-border);
+    border-radius: 0.5rem;
+    color: var(--text-primary);
+    padding: 0.8rem;
+    margin: 1rem 0;
+    resize: none;
+    font-family: inherit;
+    font-size: 1rem;
+}
+
+textarea:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+    background: rgba(255, 255, 255, 0.8);
+}
+
+.button-group {
+    display: flex;
+    gap: 1rem;
+}
+
+button {
+    padding: 0.8rem 1.5rem;
+    border-radius: 0.5rem;
+    border: none;
+    cursor: pointer;
+    font-family: var(--font-family);
+    font-size: 1rem;
+    transition: all 0.2s;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.primary-btn {
+    background: var(--accent-primary);
+    color: #F4F1E2;
+}
+
+.secondary-btn {
+    background: transparent;
+    border: 1px solid var(--accent-primary);
+    color: var(--accent-primary);
+}
+
+.timeline-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.timeline-day {
+    margin-bottom: 1.5rem;
+}
+
+.day-header {
+    font-size: 1.5rem;
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+    border-bottom: 1px solid var(--card-border);
+    padding-bottom: 0.5rem;
+}
+
+.task-card {
+    background: rgba(255, 255, 255, 0.7);
+    border-left: 4px solid var(--accent-secondary);
+    padding: 1.2rem;
+    border-radius: 0.5rem;
+    margin-bottom: 0.8rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: transform 0.2s;
+}
+
+.task-card:hover {
+    transform: translateX(5px);
+    background: #fff;
+}
+
+.task-time {
+    font-weight: 600;
+    margin-right: 1rem;
+    color: var(--text-secondary);
+}
+
+.task-name {
+    font-size: 1.1rem;
+}
+
+.input-group {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.task-input {
+    flex: 3;
+    padding: 0.8rem;
+    border-radius: 0.5rem;
+    border: 1px solid var(--card-border);
+    background: rgba(255, 255, 255, 0.5);
+    font-family: inherit;
+    font-size: 1rem;
+}
+
+.duration-input {
+    flex: 1;
+    padding: 0.8rem;
+    border-radius: 0.5rem;
+    border: 1px solid var(--card-border);
+    background: rgba(255, 255, 255, 0.5);
+    font-family: inherit;
+    font-size: 1rem;
+}
+
+.task-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.icon-btn {
+    background: transparent;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 0.2rem;
+    transition: transform 0.2s;
+}
+
+.icon-btn:hover {
+    transform: scale(1.2);
+}
+
+.conflict-alert {
+    background: rgba(233, 69, 96, 0.1);
+    border: 1px solid #e94560;
+    color: #c0392b;
+    padding: 0.8rem;
+    border-radius: 0.5rem;
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.wellness-tip {
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    font-style: italic;
+    border-left: 2px solid var(--accent-highlight);
+    padding-left: 0.5rem;
+}
