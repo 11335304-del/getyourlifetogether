@@ -285,12 +285,10 @@ def get_schedule():
 # ==========================
 # AI Wellness Coach (Gemini)
 # ==========================
-import google.generativeai as genai
-import os
 
-# Configure API Key
-GEMINI_API_KEY = "AIzaSyDQJ7hMcPvVVdVx0F0X0fdrlyXlTosI4eE"
-genai.configure(api_key=GEMINI_API_KEY)
+import google.generativeai as genai
+
+genai.configure(api_key="AIzaSyDQJ7hMcPvVVdVx0F0X0fdrlyXlTosI4eE")
 
 @app.route('/api/analyze_wellness', methods=['POST'])
 def analyze_wellness():
