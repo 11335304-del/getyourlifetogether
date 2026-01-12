@@ -289,7 +289,7 @@ import google.generativeai as genai
 import os
 
 # Configure API Key
-GEMINI_API_KEY = "AIzaSyBlw_P8JGQ9TTWKgviiuJ_XZoW3n0_z1eU"
+GEMINI_API_KEY = "AIzaSyDQJ7hMcPvVVdVx0F0X0fdrlyXlTosI4eE"
 genai.configure(api_key=GEMINI_API_KEY)
 
 @app.route('/api/analyze_wellness', methods=['POST'])
